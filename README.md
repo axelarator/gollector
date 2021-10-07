@@ -28,17 +28,7 @@ API Keys are handled through environment variables.
 
 A `help` command will show available commands. Just run `./gollector help .`
 
-- Commands:
-  - search [Submit IP to shodan with ability to pivot on JARM signature]
-  - rdns [Reverse DNS lookup]
-  - whois [Standard whois lookup]
-  - unfurl [Unfurl an address to break it up into components]
-  - bracket : unbracket [Modifies a url to avoid accidental clicks : Does the opposite]
-  - urlencode : urldecode [Converts URL to UTF-8 format : Converts UTF-8 back to plaintext]
-  - b64encode : b64decode [Simple base64 encode : decode]
-  - vt [Submit a url/hash/ip to VirusTotal]
-
 ## Run
 
-- MacOS / Linux: `./gollector search <ip>`
-- Windows: `gollector.exe search <ip>`
+- MacOS / Linux: `./gollector [command] <ip>`
+- Windows: `gollector.exe [command] <input>`
