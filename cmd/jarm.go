@@ -99,30 +99,29 @@ type Query struct {
 }
 
 type FullList struct {
-	FullList []Data `json:"data"`
-}
-
-type Data struct {
-	Attribute Attributes `json:"attributes"`
-	Type      string     `json:"type"`
-	Links     []Link     `json:"links"`
-}
-
-type Link struct {
-	Self string `json:"self"`
-}
-type Attributes struct {
-	Type   string        `json:"type_description"`
-	Name   string        `json:"meaningful_name"`
-	Magic  string        `json:"magic"`
-	Whois  string        `json:"whois"`
-	Stats  AnalysisStats `json:"last_analysis_stats"`
-	Sha256 struct {
-		Fingerprint string `json:"thumbprint_sha256"`
-	} `json:"last_https_certificate"`
-}
-type AnalysisStats struct {
-	Malicious int `json:"malicious"`
+	FullList []struct {
+		Attribute struct {
+			Type  string `json:"type_description"`
+			Name  string `json:"meaningful_name"`
+			Magic string `json:"magic"`
+			Whois string `json:"whois"`
+			Stats struct {
+				Malicious int `json:"malicious"`
+			} `json:"last_analysis_stats"`
+			ASN      int    `json:"asn"`
+			AS_Owner string `json:"as_owner"`
+			Sha256   struct {
+				Fingerprint string `json:"thumbprint_sha256"`
+			} `json:"last_https_certificate"`
+		} `json:"attributes"`
+		Type  string `json:"type"`
+		Links []struct {
+			Self string `json:"self"`
+		} `json:"links"`
+	} `json:"data"`
+	Meta struct {
+		Count int `json:"count"`
+	} `json:"meta"`
 }
 
 var host Host
@@ -163,9 +162,9 @@ func (s *Client) HostSearch(q string, jarm chan string) {
 	for i := 0; i < len(host.Ports); i++ {
 		if host.Data[i].SSL.Jarm != "" {
 			fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-			fmt.Printf("Port:\n %d\n", host.Data[i].Port)
+			fmt.Printf("Port: %d [%s]\n", host.Data[i].Port, host.Data[i].Product)
 			fmt.Println("------------------------------")
-			fmt.Printf("Header:\n %s", host.Data[i].Data)
+			fmt.Printf("Header:\n%s", host.Data[i].Data)
 			fmt.Println("------------------------------")
 			fmt.Printf("Subject: CN=%s\n", host.Data[i].SSL.Cert.Subject.CN)
 			fmt.Printf("Serial: %d\n", host.Data[i].SSL.Cert.Serial)
@@ -181,9 +180,7 @@ func (s *Client) HostSearch(q string, jarm chan string) {
 			fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 			fmt.Printf("Port: %d [%s]\n", host.Data[i].Port, host.Data[i].Product)
 			fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-
 		}
-
 	}
 	fmt.Printf("More details here: https://www.shodan.io/host/%s\n", q)
 	fmt.Println("----------------------------------------------------")
@@ -237,9 +234,17 @@ func (s *Client) Pivot(fp string) {
 }
 
 func (s *Client) VTLookup(key string) {
+
+	var structured FullList
+	var structured2 FullList
 	client := http.Client{}
+	client2 := http.Client{}
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/search?query=%s", VtURL, key), nil)
+
+	// pass a SHA256 hash to return a list of files that executed the given file. Limited to 10 for now
+	req2, err := http.NewRequest("GET", fmt.Sprintf("%s/files/%s/execution_parents", VtURL, key), nil)
 	req.Header.Set("X-Apikey", s.apiKey)
+	req2.Header.Set("X-Apikey", s.apiKey)
 
 	if err != nil {
 		log.Fatal(err)
@@ -249,22 +254,25 @@ func (s *Client) VTLookup(key string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer resp.Body.Close()
-
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var structured FullList
+	resp2, err := client2.Do(req2)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp2.Body.Close()
+	body2, err := ioutil.ReadAll(resp2.Body)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	json.Unmarshal([]byte(body), &structured)
+	json.Unmarshal([]byte(body2), &structured2)
 
 	for i := 0; i < len(structured.FullList); i++ {
 		switch structured.FullList[i].Type {
@@ -273,19 +281,23 @@ func (s *Client) VTLookup(key string) {
 			fmt.Println("----------------------------------------------------")
 			fmt.Printf("HTTPS CERT SHA256: %s\n", structured.FullList[i].Attribute.Sha256.Fingerprint)
 			fmt.Println("----------------------------------------------------")
-			fmt.Printf("Whois: %s\n", structured.FullList[i].Attribute.Whois)
+			fmt.Printf("ASN: %d\n", structured.FullList[i].Attribute.ASN)
+			fmt.Printf("AS_Owner: %s\n", structured.FullList[i].Attribute.AS_Owner)
 		case "ip_address":
 			fmt.Printf("Malicious score: %d\n", structured.FullList[i].Attribute.Stats.Malicious)
 			fmt.Println("----------------------------------------------------")
 			fmt.Printf("HTTPS CERT SHA256: %s\n", structured.FullList[i].Attribute.Sha256.Fingerprint)
 			fmt.Println("----------------------------------------------------")
-			fmt.Printf("Whois: %s\n", structured.FullList[i].Attribute.Whois)
+			fmt.Printf("ASN: %d\n", structured.FullList[i].Attribute.ASN)
+			fmt.Printf("AS_Owner: %s\n", structured.FullList[i].Attribute.AS_Owner)
 		case "file":
 			fmt.Printf("Malicious score: %d\n", structured.FullList[i].Attribute.Stats.Malicious)
 			fmt.Println("----------------------------------------------------")
 			fmt.Printf("Magic: %s\n", structured.FullList[i].Attribute.Magic)
 			fmt.Println("----------------------------------------------------")
 			fmt.Printf("Name: %s\n", structured.FullList[i].Attribute.Name)
+			fmt.Println("----------------------------------------------------")
+			fmt.Printf("Count: %d\n", structured2.Meta.Count)
 		default:
 			fmt.Println(structured.FullList[i].Attribute)
 		}

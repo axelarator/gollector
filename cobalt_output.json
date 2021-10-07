@@ -1,0 +1,79 @@
+# Nmap 7.80 scan initiated Wed Oct  6 19: 36: 47 2021 as: /usr/bin/nmap --script=grab_beacon_config.nse -oN cobalt_output.json -v10 -oX - 121.4.20.253
+Increasing send delay for 121.4.20.253 from 0 to 5 due to 36 out of 119 dropped probes since last increase.
+Nmap scan report for 121.4.20.253
+Host is up, received syn-ack (0.27s latency).
+Scanned at 2021-10-06 19: 36: 47 EDT for 48s
+Not shown: 994 closed ports
+Reason: 994 conn-refused
+PORT     STATE    SERVICE         REASON
+22/tcp   open     ssh             syn-ack
+53/tcp   filtered domain          no-response
+80/tcp   open     http            syn-ack
+|_grab_beacon_config: {
+    "x64": {
+        "md5": "7e2c427186d4e1bac52813383423e82e",
+        "uri_queried": "\/FecO",
+        "sha256": "887c8ada6058f01125a5131f1c495ba5f0171b2c40466ea824494403b87c1a22",
+        "config": {},
+        "time": 1633563447909.1,
+        "sha1": "bdede1efdd02eec3e5ee34eb555e44227d2bb2f1"
+    },
+    "x86": {
+        "md5": "7e2c427186d4e1bac52813383423e82e",
+        "uri_queried": "\/kZER",
+        "sha256": "887c8ada6058f01125a5131f1c495ba5f0171b2c40466ea824494403b87c1a22",
+        "config": {},
+        "time": 1633563447315.6,
+        "sha1": "bdede1efdd02eec3e5ee34eb555e44227d2bb2f1"
+    }
+}
+443/tcp  open     https           syn-ack
+|_grab_beacon_config: {
+    "x64": {
+        "md5": "bcbc9d820fe35a02c38ad9dc56e6fab2",
+        "uri_queried": "\/7wlC",
+        "sha256": "3c7ff565561982c927eb4e73efa2ba3a125b57b83e73848e8bf750c520d6c178",
+        "config": {
+            "Spawn To x64": "%windir%\\sysnative\\rundll32.exe",
+            "Spawn To x86": "%windir%\\syswow64\\rundll32.exe",
+            "Beacon Type": "8 (HTTPS)",
+            "HTTP Method Path 2": "\/c\/msdownload\/store\/2020\/02\/412321_",
+            "Jitter": 20,
+            "Watermark": 1359593325,
+            "Port": 443,
+            "Method 2": "GET",
+            "C2 Host Header": "",
+            "Method 1": "GET",
+            "Polling": 3000,
+            "C2 Server": "121.4.20.253,\/c\/msdownload\/update\/others\/2016\/12\/29136388_"
+        },
+        "time": 1633563453553.9,
+        "sha1": "44b4d51f71b31a7d3cfb3188701a5e94f9e9d226"
+    },
+    "x86": {
+        "md5": "bc2197f440e2106b399193df0c819c0a",
+        "uri_queried": "\/Wn5b",
+        "sha256": "8031410f2d1b636721f7979f75b6e7e353827bab9673198d399ece8335cecf04",
+        "config": {
+            "Spawn To x64": "%windir%\\sysnative\\rundll32.exe",
+            "Spawn To x86": "%windir%\\syswow64\\rundll32.exe",
+            "Beacon Type": "8 (HTTPS)",
+            "HTTP Method Path 2": "\/c\/msdownload\/store\/2020\/02\/412321_",
+            "Jitter": 20,
+            "Watermark": 1359593325,
+            "Port": 443,
+            "Method 2": "GET",
+            "C2 Host Header": "",
+            "Method 1": "GET",
+            "Polling": 3000,
+            "C2 Server": "121.4.20.253,\/c\/msdownload\/update\/others\/2016\/12\/29136388_"
+        },
+        "time": 1633563448844.9,
+        "sha1": "d37f6471128b9fc62e863ac4b61071900af0d433"
+    }
+}
+445/tcp  filtered microsoft-ds    no-response
+7000/tcp open     afs3-fileserver syn-ack
+
+Read data files from: /usr/bin/../share/nmap
+# Nmap done at Wed Oct  6 19: 37: 35 2021 -- 1 IP address (1 host up) scanned in 48.71 seconds
